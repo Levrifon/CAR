@@ -9,4 +9,6 @@ public class ReturnCode {
 	public static final int FINISH_TRANS = 226;
 	public static final int DECONNECT = 221;
 	public static final int ERR_CMD = 503;
+	public static final int NON_AUTH = 530;
+	public static final int FILE_NOTFOUND = 550;
 }

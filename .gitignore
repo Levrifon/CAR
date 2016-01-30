@@ -1,2 +1,6 @@
 .classpath
 .project
+.class
+.metadata
+*/bin/*
+TP1/bin/*

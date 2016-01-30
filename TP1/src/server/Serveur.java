@@ -8,7 +8,9 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class Serveur {
+	@SuppressWarnings("unused")
 	private int port;
+	@SuppressWarnings("unused")
 	private File directory;
 	private ServerSocket serversocket;
 	private HashMap<String,String> accounts;
@@ -30,7 +32,6 @@ public class Serveur {
 		while(true) {
 			try {
 				sck = serversocket.accept();
-				System.out.println("toto");
 				request = new FtpRequest(sck,this);
 				request.start();
 				
@@ -42,6 +43,10 @@ public class Serveur {
 		}
 	}
 	
+	public File getCurrentDirectory() {
+		return this.directory;
+	}
+	
 	private void addAccount(String user, String pwd) {
 		accounts.put(user,pwd);
 	}
@@ -51,6 +56,7 @@ public class Serveur {
 		int port;
 		System.out.println("Please specify directory and port for the server :");
 		System.out.println("Directory:");
+		@SuppressWarnings("resource")
 		Scanner scanner = new Scanner(System.in);
 		dir = new File(scanner.nextLine());
 		if(!dir.exists()) {
