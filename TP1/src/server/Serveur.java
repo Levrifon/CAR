@@ -10,7 +10,6 @@ import java.util.Scanner;
 public class Serveur {
 	@SuppressWarnings("unused")
 	private int port;
-	@SuppressWarnings("unused")
 	private File directory;
 	private ServerSocket serversocket;
 	private HashMap<String,String> accounts;
