@@ -17,9 +17,9 @@ public class Serveur {
 	public Serveur(File f, int port) {
 		this.port = port;
 		this.directory = f;
+		accounts = new HashMap<String,String>();
 		try {
 			serversocket = new ServerSocket(port);
-			accounts = new HashMap<String,String>();
 		} catch (IOException e) {
 			System.err.println("Error during creation of socket");
 		}
@@ -38,7 +38,6 @@ public class Serveur {
 				System.err.println("Error during accept of socket");
 				break;
 			}
-			
 		}
 	}
 	
@@ -46,7 +45,7 @@ public class Serveur {
 		return this.directory;
 	}
 	
-	private void addAccount(String user, String pwd) {
+	public void addAccount(String user, String pwd) {
 		accounts.put(user,pwd);
 	}
 
@@ -74,10 +73,19 @@ public class Serveur {
 	}
 
 	public boolean connect(String user, String pwd) {
+		if(!accounts.containsKey(user)) { return false;}
 		return accounts.get(user).equals(pwd);
 	}
 
 	public boolean userExists(String user) {
 		return accounts.containsKey(user);
+	}
+	
+	public void closeServer() {
+		try {
+			serversocket.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
