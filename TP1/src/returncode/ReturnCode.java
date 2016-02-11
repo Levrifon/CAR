@@ -4,6 +4,7 @@ public class ReturnCode {
 	private static final int SERVICE_OK = 220;
 	private static final int WAIT_MDP = 331;
 	private static final int AUTH_FAIL = 332;
+	private static final int DATA_OPEN = 200;
 	private static final int AUTH_SUCC = 230;
 	private static final int START_TRANS = 125;
 	private static final int FINISH_TRANS = 226;
@@ -34,4 +35,14 @@ public class ReturnCode {
 	public static String fileNotFound() {
 		return FILE_NOTFOUND + " File not found";
 	}
+	public static String dataConnectionOpen() {
+		return DATA_OPEN + "PORT command Successful";
+	}
+	public static String startTransfert() {
+		return START_TRANS + "Transfer starting for file list";
+	}
+	public static String finishTransfert() {
+		return FINISH_TRANS + "Transfer finish for file list";
+	}
+	
 }

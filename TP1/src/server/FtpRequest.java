@@ -7,7 +7,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -15,13 +17,13 @@ import returncode.ReturnCode;
 
 public class FtpRequest extends Thread {
 	private Socket socket;
-	private PrintWriter output;
+	private Socket socketData;
+	private PrintWriter output,outputData;
 	private BufferedReader input;
 	private boolean isIdentified, isConnected;
 	private Serveur serv;
 	private String user;
 	private File dir;
-
 	public FtpRequest(Socket sck, Serveur serv) throws IOException {
 		this.socket = sck;
 		this.serv = serv;
@@ -93,12 +95,46 @@ public class FtpRequest extends Thread {
 		case "CWD":
 			arg = received[1];
 			processCWD(arg);
+			break;
 		case "QUIT":
 			processQUIT();
+			break;
+		case "PORT":
+			arg = received[1];
+			processPORT(arg);
+			break;
+		case "GET":
 		default:
 			output.println(ReturnCode.wrongSequence());
 			break;
 		}
+	}
+
+	private void processPORT(String arg) {
+		String[] argaddr = arg.split(",",6);
+		String myaddr = "";
+		for(int i = 0 ; i < 4 ; i ++) {
+			if(i < 3) {
+				myaddr += argaddr[i] + ".";
+			} else {
+				myaddr += argaddr[i];
+			}
+		}
+		Integer argport = Integer.parseInt(argaddr[4])*256 + Integer.parseInt(argaddr[5]);
+		InetAddress addr;
+		try {
+			addr = InetAddress.getByName(myaddr);
+			socketData = new Socket(addr, argport);
+			outputData =  new PrintWriter(socketData.getOutputStream(), true);
+		} catch (UnknownHostException e1) {
+			e1.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		output.write(ReturnCode.dataConnectionOpen());
+		output.write(ReturnCode.startTransfert());
+		output.write(ReturnCode.finishTransfert());
+		System.out.println("toto");
 	}
 
 	private void processQUIT() {
@@ -146,7 +182,7 @@ public class FtpRequest extends Thread {
 
 	private void processPASS(String pwd) {
 		if (isConnected) {
-			output.println(ReturnCode.nonAuth());
+			output.println("Already connected");
 			return;
 		}
 		if (isIdentified) {
