@@ -4,6 +4,9 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -18,12 +21,13 @@ import returncode.ReturnCode;
 public class FtpRequest extends Thread {
 	private Socket socket;
 	private Socket socketData;
-	private PrintWriter output,outputData;
-	private BufferedReader input;
+	private PrintWriter output, outputData;
+	private BufferedReader input,inputData;
 	private boolean isIdentified, isConnected;
 	private Serveur serv;
 	private String user;
 	private File dir;
+
 	public FtpRequest(Socket sck, Serveur serv) throws IOException {
 		this.socket = sck;
 		this.serv = serv;
@@ -67,7 +71,7 @@ public class FtpRequest extends Thread {
 		received = message.split(" ", 2);
 		if (received.length < 2) {
 			if (!(received[0].equals("LIST") || received[0].equals("QUIT") || received[0]
-					.equals("PWD"))) {
+					.equals("PWD")) || received[0].equals("SYST")) {
 				output.println(ReturnCode.wrongSequence());
 				return;
 			}
@@ -81,6 +85,9 @@ public class FtpRequest extends Thread {
 		case "PASS":
 			arg = received[1];
 			processPASS(arg);
+			break;
+		case "SYST":
+			processSYST();
 			break;
 		case "LIST":
 			processLIST();
@@ -103,45 +110,71 @@ public class FtpRequest extends Thread {
 			arg = received[1];
 			processPORT(arg);
 			break;
+		case "RETR":
+			FileInputStream f;
+			File file;
+			try {
+				f = new FileInputStream(received[1]);
+				processRETR(f);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
 		case "GET":
+			/*TODO*/
+			break;
 		default:
 			output.println(ReturnCode.wrongSequence());
 			break;
 		}
 	}
 
+	private void processRETR(FileInputStream arg){
+		char[] buffer = new char[4096];
+		output.println(ReturnCode.fileStatusOk());
+		try {
+			arg.read(buffer);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		outputData.write(buffer,0,buffer.length);
+		
+		outputData.close();
+		output.println(ReturnCode.finishTransfert());
+	}
+
+	private void processSYST() {
+		output.println(ReturnCode.systType());
+	}
+
 	private void processPORT(String arg) {
-		String[] argaddr = arg.split(",",6);
+		String[] argaddr = arg.split(",", 6);
 		String myaddr = "";
-		for(int i = 0 ; i < 4 ; i ++) {
-			if(i < 3) {
+		for (int i = 0; i < 4; i++) {
+			if (i < 3) {
 				myaddr += argaddr[i] + ".";
 			} else {
 				myaddr += argaddr[i];
 			}
 		}
-		Integer argport = Integer.parseInt(argaddr[4])*256 + Integer.parseInt(argaddr[5]);
+		Integer argport = Integer.parseInt(argaddr[4]) * 256
+				+ Integer.parseInt(argaddr[5]);
 		InetAddress addr;
 		try {
 			addr = InetAddress.getByName(myaddr);
 			socketData = new Socket(addr, argport);
-			outputData =  new PrintWriter(socketData.getOutputStream(), true);
+			outputData = new PrintWriter(socketData.getOutputStream(), true);
+			inputData = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		} catch (UnknownHostException e1) {
 			e1.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		output.write(ReturnCode.dataConnectionOpen());
-		output.write(ReturnCode.startTransfert());
-		output.write(ReturnCode.finishTransfert());
-		System.out.println("toto");
+		output.println(ReturnCode.serviceOK());
 	}
 
 	private void processQUIT() {
 		this.isIdentified = false;
 		this.isConnected = false;
-		interrupt();
-
 	}
 
 	private void processSTOR(String arg) {
@@ -165,19 +198,23 @@ public class FtpRequest extends Thread {
 	}
 
 	private void processLIST() {
+		System.out.println("Current dir : " + this.dir.getName());
+		output.println(ReturnCode.startTransfert());
+		String resultDir = "";
 		if (!isConnected) {
 			output.println(ReturnCode.nonAuth());
 			return;
 		}
 		File[] listFiles = dir.listFiles();
 		if (listFiles.length == 0) {
-			System.out.println("Empty dir");
+			output.println(ReturnCode.fileNotFound());
 			return;
 		}
-
-		for (File f : dir.listFiles()) {
-			output.println(f.getName());
+		for (File f : listFiles) {
+			outputData.println(f.getName());
 		}
+		output.println(ReturnCode.finishTransfert());
+		outputData.close();
 	}
 
 	private void processPASS(String pwd) {
@@ -206,17 +243,15 @@ public class FtpRequest extends Thread {
 			return;
 		}
 		output.println(dir.getAbsolutePath());
-
 	}
-	
+
 	private void processCWD(String directory) {
 		File f = new File(directory);
-		if(!f.exists() || !(f.isDirectory())) {
+		if (!f.exists() || !(f.isDirectory())) {
 			output.println(ReturnCode.fileNotFound());
 			return;
 		}
 		this.dir = f;
-		
 	}
 
 	private void processUSER(String user) {
