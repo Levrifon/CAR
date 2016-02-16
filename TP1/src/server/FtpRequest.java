@@ -6,10 +6,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -22,7 +22,8 @@ import returncode.ReturnCode;
 public class FtpRequest extends Thread {
 	private Socket socket;
 	private Socket socketData;
-	private PrintWriter output, outputData;
+	private PrintWriter output;
+	private OutputStreamWriter outputData;
 	private BufferedReader input;
 	private boolean isIdentified, isConnected;
 	private Serveur serv;
@@ -126,12 +127,12 @@ public class FtpRequest extends Thread {
 	}
 
 	private void processRETR(String arg){
+		InputStream flux;
 		InputStreamReader reader;
 		BufferedReader buff = null;
 		String currLine ="",line ="";
 		String pathSrc = this.dir.getAbsolutePath() +"/" + arg;
 		File file = new File(pathSrc);
-		InputStream flux;
 		try {
 			flux = new FileInputStream(file);
 			reader = new InputStreamReader(flux);
@@ -157,17 +158,16 @@ public class FtpRequest extends Thread {
 			while((currLine = buff.readLine())!=null) {
 				line += currLine + '\n';
 			}
-			outputData.write(line);
-			outputData.write('\0');
 			buff.close();
+			outputData.write(line);
+			outputData.flush();
+			outputData.close();
 		} catch (FileNotFoundException e) {
 			output.println(ReturnCode.fileNotFound());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		outputData.flush();
-		outputData.close();
 		output.println(ReturnCode.finishTransfert());
 	}
 
@@ -191,7 +191,7 @@ public class FtpRequest extends Thread {
 		try {
 			addr = InetAddress.getByName(myaddr);
 			socketData = new Socket(addr, argport);
-			outputData = new PrintWriter(socketData.getOutputStream(), true);
+			outputData = new OutputStreamWriter(socketData.getOutputStream());
 		} catch (UnknownHostException e1) {
 			e1.printStackTrace();
 		} catch (IOException e) {
@@ -226,22 +226,32 @@ public class FtpRequest extends Thread {
 	}
 
 	private void processLIST() {
-		System.out.println("Current dir : " + this.dir.getName());
-		output.println(ReturnCode.startTransfert());
+		System.out.println("Current dir : " + this.userDir.getName());
 		if (!isConnected) {
 			output.println(ReturnCode.nonAuth());
 			return;
 		}
-		File[] listFiles = dir.listFiles();
+		File[] listFiles = userDir.listFiles();
 		if (listFiles.length == 0) {
-			output.println(ReturnCode.fileNotFound());
+			output.println(ReturnCode.actionNotTaken());
+			try {
+				outputData.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			return;
 		}
-		for (File f : listFiles) {
-			outputData.println(f.getName());
+		try {
+			output.println(ReturnCode.startTransfert());
+			for (File f : listFiles) {
+				outputData.write(f.getName());
+				outputData.write('\n');
+			}
+			output.println(ReturnCode.finishTransfert());
+			outputData.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		output.println(ReturnCode.finishTransfert());
-		outputData.close();
 	}
 
 	private void processPASS(String pwd) {
@@ -269,16 +279,24 @@ public class FtpRequest extends Thread {
 			output.println(ReturnCode.nonAuth());
 			return;
 		}
-		output.println(userDir.getAbsolutePath());
+		output.write(userDir.getAbsolutePath());
+		output.flush();
+		output.println(ReturnCode.serviceOK());
 	}
 
 	private void processCWD(String directory) {
-		File f = new File(directory);
+		/* verifie si le dossier dans lequel on veut naviguer correspond déjà au dossier de l'utilisateur */
+		if(sameDirectory(directory)) {
+			output.println(ReturnCode.fileNotFound());
+			return;
+		}
+		File f = new File(userDir.getAbsolutePath() + "/" +directory);
 		if (!f.exists() || !(f.isDirectory())) {
 			output.println(ReturnCode.fileNotFound());
 			return;
 		}
-		this.dir = f;
+		this.userDir = f;
+		output.println(ReturnCode.fileActionOkay());
 	}
 
 	private void processUSER(String user) {
@@ -292,5 +310,9 @@ public class FtpRequest extends Thread {
 		} else {
 			output.println(ReturnCode.authFail());
 		}
+	}
+	
+	private boolean sameDirectory(String directory) {
+		return (dir.getAbsolutePath() + "/" + directory).equals(userDir.getAbsolutePath());
 	}
 }
