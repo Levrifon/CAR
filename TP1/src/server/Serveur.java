@@ -33,7 +33,6 @@ public class Serveur {
 				sck = serversocket.accept();
 				request = new FtpRequest(sck,this);
 				request.start();
-				
 			} catch (IOException e) {
 				System.err.println("Error during accept of socket");
 				break;
@@ -47,6 +46,10 @@ public class Serveur {
 	
 	public void addAccount(String user, String pwd) {
 		accounts.put(user,pwd);
+		File file = new File(directory.getAbsolutePath() + "/" + user);
+		if(!file.exists()) {
+			file.mkdir();
+		}
 	}
 
 	public static void main(String[] args) {
@@ -68,7 +71,7 @@ public class Serveur {
 		Serveur server = new Serveur(dir,port);
 		server.addAccount("guest","guest");
 		server.addAccount("admin","1234");
-		server.addAccount("toto","password");
+		server.addAccount("titi","password");
 		server.waitConnexion();
 	}
 

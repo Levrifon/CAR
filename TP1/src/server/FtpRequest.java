@@ -6,8 +6,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetAddress;
@@ -22,11 +23,12 @@ public class FtpRequest extends Thread {
 	private Socket socket;
 	private Socket socketData;
 	private PrintWriter output, outputData;
-	private BufferedReader input,inputData;
+	private BufferedReader input;
 	private boolean isIdentified, isConnected;
 	private Serveur serv;
 	private String user;
 	private File dir;
+	private File userDir;
 
 	public FtpRequest(Socket sck, Serveur serv) throws IOException {
 		this.socket = sck;
@@ -111,14 +113,9 @@ public class FtpRequest extends Thread {
 			processPORT(arg);
 			break;
 		case "RETR":
-			FileInputStream f;
-			File file;
-			try {
-				f = new FileInputStream(received[1]);
-				processRETR(f);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			}
+			arg = received[1];
+			processRETR(arg);
+			break;
 		case "GET":
 			/*TODO*/
 			break;
@@ -128,16 +125,48 @@ public class FtpRequest extends Thread {
 		}
 	}
 
-	private void processRETR(FileInputStream arg){
-		char[] buffer = new char[4096];
+	private void processRETR(String arg){
+		InputStreamReader reader;
+		BufferedReader buff = null;
+		String currLine ="",line ="";
+		String pathSrc = this.dir.getAbsolutePath() +"/" + arg;
+		File file = new File(pathSrc);
+		InputStream flux;
+		try {
+			flux = new FileInputStream(file);
+			reader = new InputStreamReader(flux);
+			buff = new BufferedReader(reader);
+
+			/*
+			 * si le fichier n'existe pas on renvoit au client le return code
+			 * correspondant
+			 */
+			if (!file.exists()) {
+				output.println(ReturnCode.fileNotFound());
+				output.println(ReturnCode.finishTransfert());
+				flux.close();
+				reader.close();
+				buff.close();
+				return;
+			}
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 		output.println(ReturnCode.fileStatusOk());
 		try {
-			arg.read(buffer);
+			while((currLine = buff.readLine())!=null) {
+				line += currLine + '\n';
+			}
+			outputData.write(line);
+			outputData.write('\0');
+			buff.close();
+		} catch (FileNotFoundException e) {
+			output.println(ReturnCode.fileNotFound());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		outputData.write(buffer,0,buffer.length);
-		
+
+		outputData.flush();
 		outputData.close();
 		output.println(ReturnCode.finishTransfert());
 	}
@@ -163,7 +192,6 @@ public class FtpRequest extends Thread {
 			addr = InetAddress.getByName(myaddr);
 			socketData = new Socket(addr, argport);
 			outputData = new PrintWriter(socketData.getOutputStream(), true);
-			inputData = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		} catch (UnknownHostException e1) {
 			e1.printStackTrace();
 		} catch (IOException e) {
@@ -175,6 +203,7 @@ public class FtpRequest extends Thread {
 	private void processQUIT() {
 		this.isIdentified = false;
 		this.isConnected = false;
+		this.interrupt();
 	}
 
 	private void processSTOR(String arg) {
@@ -188,7 +217,6 @@ public class FtpRequest extends Thread {
 			return;
 		}
 		try {
-			System.out.println("Coucou");
 			Files.copy(Paths.get(f.getPath()),
 					Paths.get(this.dir.getPath() + f.getName()),
 					REPLACE_EXISTING);
@@ -200,7 +228,6 @@ public class FtpRequest extends Thread {
 	private void processLIST() {
 		System.out.println("Current dir : " + this.dir.getName());
 		output.println(ReturnCode.startTransfert());
-		String resultDir = "";
 		if (!isConnected) {
 			output.println(ReturnCode.nonAuth());
 			return;
@@ -226,7 +253,7 @@ public class FtpRequest extends Thread {
 			if (serv.connect(user, pwd)) {
 				output.println(ReturnCode.authSucc());
 				isConnected = true;
-				System.out.println("Successful Connect!");
+				this.userDir = new File(dir.getAbsolutePath() + "/" + user);
 			} else {
 				output.println(ReturnCode.authFail());
 				return;
@@ -242,7 +269,7 @@ public class FtpRequest extends Thread {
 			output.println(ReturnCode.nonAuth());
 			return;
 		}
-		output.println(dir.getAbsolutePath());
+		output.println(userDir.getAbsolutePath());
 	}
 
 	private void processCWD(String directory) {
