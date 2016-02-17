@@ -16,6 +16,7 @@ public class ReturnCode {
 	private static final int ERR_CMD = 503;
 	private static final int NON_AUTH = 530;
 	private static final int FILE_NOTFOUND = 550;
+	private static final int FILE_NOT_ALLOWED = 553;
 	
 	public static String serviceOK() {
 		return SERVICE_OK + " Service OK";
@@ -23,7 +24,6 @@ public class ReturnCode {
 	public static String wrongSequence() {
 		return ERR_CMD + " Wrong command sequence";
 	}
-	
 	public static String authFail() {
 		return AUTH_FAIL + " Wrong user name";
 	}
@@ -62,6 +62,9 @@ public class ReturnCode {
 	}
 	public static String quit() {
 		return DECONNECT + " leaving FTP server";
+	}
+	public static String notAllowed() {
+		return FILE_NOT_ALLOWED + " Requested action not taken. File name not allowed";
 	}
 	
 }

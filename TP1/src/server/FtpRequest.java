@@ -47,6 +47,7 @@ public class FtpRequest extends Thread {
 	}
 
 	private void sendServiceOK() {
+		System.out.println("wut wut");
 		output.println(ReturnCode.serviceOK());
 		while (!isConnected) {
 			processRequest();
@@ -284,7 +285,6 @@ public class FtpRequest extends Thread {
 		output.write(userDir.getAbsolutePath());
 		output.write('\n');
 		output.flush();
-		output.println(ReturnCode.serviceOK());
 	}
 
 	private void processCWD(String directory) {
@@ -295,6 +295,10 @@ public class FtpRequest extends Thread {
 		}
 		/* si on veut retourner dans le dossier précédent, le cwd devient le parent */
 		if (directory.equals("..")) {
+			if(userDir.getParent().equals(dir)) {
+				output.println(ReturnCode.notAllowed());
+				return;
+			}
 			userDir = new File(userDir.getParent());
 		} else {
 			File f = new File(userDir.getAbsolutePath() + "/" + directory);
