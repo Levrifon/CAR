@@ -60,5 +60,8 @@ public class ReturnCode {
 	public static String actionNotTaken() {
 		return FILE_ACTION_NOT_TAKEN + " Requested file action not taken";
 	}
+	public static String quit() {
+		return DECONNECT + " leaving FTP server";
+	}
 	
 }

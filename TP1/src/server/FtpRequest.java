@@ -203,7 +203,9 @@ public class FtpRequest extends Thread {
 	private void processQUIT() {
 		this.isIdentified = false;
 		this.isConnected = false;
-		this.interrupt();
+		output.write(ReturnCode.quit());
+		output.write('\n');
+		output.flush();
 	}
 
 	private void processSTOR(String arg) {
@@ -280,6 +282,7 @@ public class FtpRequest extends Thread {
 			return;
 		}
 		output.write(userDir.getAbsolutePath());
+		output.write('\n');
 		output.flush();
 		output.println(ReturnCode.serviceOK());
 	}
@@ -290,12 +293,17 @@ public class FtpRequest extends Thread {
 			output.println(ReturnCode.fileNotFound());
 			return;
 		}
-		File f = new File(userDir.getAbsolutePath() + "/" +directory);
-		if (!f.exists() || !(f.isDirectory())) {
-			output.println(ReturnCode.fileNotFound());
-			return;
+		/* si on veut retourner dans le dossier précédent, le cwd devient le parent */
+		if (directory.equals("..")) {
+			userDir = new File(userDir.getParent());
+		} else {
+			File f = new File(userDir.getAbsolutePath() + "/" + directory);
+			if (!f.exists() || !(f.isDirectory())) {
+				output.println(ReturnCode.fileNotFound());
+				return;
+			}
+			this.userDir = f;
 		}
-		this.userDir = f;
 		output.println(ReturnCode.fileActionOkay());
 	}
 
