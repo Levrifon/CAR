@@ -209,7 +209,7 @@ public class FtpRequest extends Thread {
 	}
 
 	private void processSTOR(String arg) {
-		String line ="";
+		String line = "";
 		String path = userDir.getAbsolutePath() + "/" + arg;
 		String currLine;
 		FileOutputStream outputFile = null;
@@ -222,18 +222,15 @@ public class FtpRequest extends Thread {
 		if (!f.exists()) {
 			try {
 				f.createNewFile();
-				outputFile = new FileOutputStream(f);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			output.println(ReturnCode.fileNotFound());
-			return;
 		}
 		try {
+			outputFile = new FileOutputStream(f);
 			buff = new BufferedReader(inputData);
 			output.println(ReturnCode.startTransfert());
-			while((currLine = buff.readLine())!=null) {
+			while ((currLine = buff.readLine()) != null) {
 				line += currLine + '\n';
 			}
 			buff.close();
