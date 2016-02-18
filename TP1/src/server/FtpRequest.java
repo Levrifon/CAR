@@ -1,11 +1,10 @@
 package server;
 
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,8 +13,6 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import returncode.ReturnCode;
 
@@ -24,6 +21,7 @@ public class FtpRequest extends Thread {
 	private Socket socketData;
 	private PrintWriter output;
 	private OutputStreamWriter outputData;
+	private BufferedReader inputData;
 	private BufferedReader input;
 	private boolean isIdentified, isConnected;
 	private Serveur serv;
@@ -193,6 +191,7 @@ public class FtpRequest extends Thread {
 			addr = InetAddress.getByName(myaddr);
 			socketData = new Socket(addr, argport);
 			outputData = new OutputStreamWriter(socketData.getOutputStream());
+			inputData = new BufferedReader(new InputStreamReader(socketData.getInputStream()));
 		} catch (UnknownHostException e1) {
 			e1.printStackTrace();
 		} catch (IOException e) {
@@ -210,19 +209,38 @@ public class FtpRequest extends Thread {
 	}
 
 	private void processSTOR(String arg) {
+		String line ="";
+		String path = userDir.getAbsolutePath() + "/" + arg;
+		String currLine;
+		FileOutputStream outputFile = null;
+		BufferedReader buff = null;
 		if (!isConnected) {
 			output.println(ReturnCode.nonAuth());
 			return;
 		}
-		File f = new File(arg);
+		File f = new File(path);
 		if (!f.exists()) {
+			try {
+				f.createNewFile();
+				outputFile = new FileOutputStream(f);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			output.println(ReturnCode.fileNotFound());
 			return;
 		}
 		try {
-			Files.copy(Paths.get(f.getPath()),
-					Paths.get(this.dir.getPath() + f.getName()),
-					REPLACE_EXISTING);
+			buff = new BufferedReader(inputData);
+			output.println(ReturnCode.startTransfert());
+			while((currLine = buff.readLine())!=null) {
+				line += currLine + '\n';
+			}
+			buff.close();
+			outputFile.write(line.getBytes());
+			outputData.flush();
+			outputData.close();
+			output.println(ReturnCode.finishTransfert());
 		} catch (IOException e) {
 			System.err.println("Error during copy of file");
 		}
