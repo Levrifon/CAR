@@ -54,7 +54,7 @@ public class Serveur {
 	}
 	
 	public boolean isOnline() {
-		return this.serversocket.isBound();
+		return !this.serversocket.isClosed();
 	}
 
 	public static void main(String[] args) {

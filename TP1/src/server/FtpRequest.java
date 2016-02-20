@@ -45,7 +45,6 @@ public class FtpRequest extends Thread {
 	}
 
 	private void sendServiceOK() {
-		System.out.println("wut wut");
 		output.println(ReturnCode.serviceOK());
 		while (!isConnected) {
 			processRequest();
