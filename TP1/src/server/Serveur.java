@@ -18,14 +18,15 @@ public class Serveur {
 		this.port = port;
 		this.directory = f;
 		accounts = new HashMap<String,String>();
-		try {
-			serversocket = new ServerSocket(port);
-		} catch (IOException e) {
-			System.err.println("Error during creation of socket");
-		}
+			try {
+				serversocket = new ServerSocket(port);
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.err.println("Error during creation of socket");
+			}
 	}
 	
-	private void waitConnexion() {
+	public void waitConnexion() {
 		Socket sck;
 		FtpRequest request;
 		while(true) {
@@ -50,6 +51,10 @@ public class Serveur {
 		if(!file.exists()) {
 			file.mkdir();
 		}
+	}
+	
+	public boolean isOnline() {
+		return this.serversocket.isBound();
 	}
 
 	public static void main(String[] args) {
