@@ -65,7 +65,7 @@ public class FtpRequest extends Thread {
 		} catch (IOException e) {
 			System.err.println("Error during reading");
 		}
-		if (message.isEmpty()) {
+		if (message.isEmpty() || message == null) {
 			output.println(ReturnCode.wrongSequence());
 			return;
 		}
