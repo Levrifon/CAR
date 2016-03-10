@@ -22,7 +22,7 @@ public class FTPResource {
 
 	@GET
 	@Produces("application/octet-stream")
-	@Path("/{path}")
+	@Path("/file/{path}")
 	public File get(@PathParam("path") String path) {
 		File file = new File(path);
 		if(file.exists()) {
@@ -40,10 +40,11 @@ public class FTPResource {
 	}
 	
 	@GET
-	@Produces("application/octet-stream")
-	@Path("/{path}")
-	public boolean connect(@PathParam("user") String user ,@PathParam("pwd") String pwd){
+	@Produces("text/html")
+	@Path("/connect/{user}/{pwd}")
+	public String connect(@PathParam("user") String user ,@PathParam("pwd") String pwd){
 		try {
+			client = new FTPClient();
 			client.connect("127.0.0.1",4444);
 		} catch (SocketException e1) {
 			e1.printStackTrace();
@@ -56,8 +57,6 @@ public class FTPResource {
 			e.printStackTrace();
 		}
 		System.out.println("Termine");
-		return true;
+		return "<h2><p>Bienvenue "  + user + " ! </p></h2>";
 	}
-	
-
 }
