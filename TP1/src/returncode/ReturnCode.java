@@ -68,7 +68,7 @@ public class ReturnCode {
 		return FILE_NOT_ALLOWED + " Requested action not taken. File name not allowed";
 	}
 	public static String pathCreated() {
-		return FILE_PATH + " Filepath created";
+		return FILE_PATH + " is current directory";
 	}
 	
 }
