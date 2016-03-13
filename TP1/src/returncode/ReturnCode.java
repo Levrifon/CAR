@@ -10,6 +10,7 @@ public class ReturnCode {
 	private static final int FINISH_TRANS = 226;
 	private static final int AUTH_SUCC = 230;
 	private static final int FILE_ACTION_OK = 250;
+	private static final int FILE_PATH = 257;
 	private static final int WAIT_MDP = 331;
 	private static final int AUTH_FAIL = 332;
 	private static final int FILE_ACTION_NOT_TAKEN = 450;
@@ -65,6 +66,9 @@ public class ReturnCode {
 	}
 	public static String notAllowed() {
 		return FILE_NOT_ALLOWED + " Requested action not taken. File name not allowed";
+	}
+	public static String pathCreated() {
+		return FILE_PATH + " Filepath created";
 	}
 	
 }
