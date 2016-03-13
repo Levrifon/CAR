@@ -1,10 +1,8 @@
 package car.tp2;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.SocketException;
 
@@ -17,11 +15,13 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.net.ftp.FTPClient;
+
 @Path("/ftp")
 public class FTPResource {
 	FTPClient client;
-	final String url = "localhost:8080/rest/tp2/ftp"; 
+	final String url = "localhost:8080/rest/tp2/ftp";
 	final String accessForbidden = "<h1> You are not connected, no access is possible </h1>";
+
 	@GET
 	@Produces("text/html")
 	public String sayHello() {
@@ -32,7 +32,7 @@ public class FTPResource {
 	@Produces("application/octet-stream")
 	@Path("/file/{path: .*}")
 	public StreamingOutput get(@PathParam("path") String path) {
-		
+
 		StreamingOutput outputstream = null;
 		try {
 			final InputStream inputstream = client.retrieveFileStream(path);
@@ -41,7 +41,7 @@ public class FTPResource {
 				public void write(OutputStream os) throws IOException,
 						WebApplicationException {
 					int lect;
-					while((lect = inputstream.read()) != -1) {
+					while ((lect = inputstream.read()) != -1) {
 						os.write(lect);
 					}
 				}
@@ -50,31 +50,24 @@ public class FTPResource {
 			e.printStackTrace();
 		}
 		return outputstream;
-		
+
 	}
-	@POST
-	@Produces("application/octet-stream")
-	@Path("/post/{path}")
-	public boolean post(@PathParam("name") String name) {
-		File f = new File(name);
-		if(f.exists()) {return false; }
-		return true;
-	}
-	
+
 	@GET
 	@Produces("text/html")
 	@Path("/connect/{user}/{pwd}")
-	public String connect(@PathParam("user") String user ,@PathParam("pwd") String pwd){
+	public String connect(@PathParam("user") String user,@PathParam("pwd") String pwd) {
 		boolean connection = false;
 		/* si l'utilisateur est déjà connecte on affiche un message le précisant */
-		if(client != null) {
-			if(client.isConnected()) {
-				return "<h2><p> Vous etes deja connecte + " + user + " </p></h2>";
+		if (client != null) {
+			if (client.isConnected()) {
+				return "<h2><p> Vous etes deja connecte + " + user
+						+ " </p></h2>";
 			}
 		}
 		try {
 			client = new FTPClient();
-			client.connect("localhost",4444);
+			client.connect("localhost", 4444);
 			connection = client.login(user, pwd);
 		} catch (SocketException e1) {
 			e1.printStackTrace();
@@ -82,11 +75,12 @@ public class FTPResource {
 			e1.printStackTrace();
 		}
 		/* si la connexion a reussi (bon login et mot de passe */
-		if(connection){
-			return "<h2><p>Bienvenue "  + user + " ! </p></h2>";
+		if (connection) {
+			return "<h2><p>Bienvenue " + user + " ! </p></h2>";
 		}
 		return "<h2><p> Mauvais identifiant et/ou mot de passe </p></h2>";
 	}
+
 	@GET
 	@Produces("text/html")
 	@Path("/list/")
@@ -98,12 +92,13 @@ public class FTPResource {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		if(filelist == null || filelist.length == 0) { 
+		if (filelist == null || filelist.length == 0) {
 			builderhtml.append("<h2><p> Repertoire Vide </p></h2>");
-		}else {
+		} else {
 			builderhtml.append("<table>");
 			for (String file : filelist) {
-				builderhtml.append("<tr><td><p><a href="+this.url+"/file/"+file+">");
+				builderhtml.append("<tr><td><p><a href=" + this.url + "/file/"
+						+ file + ">");
 				builderhtml.append(file);
 				builderhtml.append("</a></p></td></tr>");
 			}
@@ -112,23 +107,24 @@ public class FTPResource {
 		System.out.println(client.getReplyString());
 		return builderhtml.toString();
 	}
-	
+
 	@GET
 	@Produces("text/html")
 	@Path("/pwd/")
 	public String pwd() {
 		try {
-			return "<h1>" +client.printWorkingDirectory() + "</h1>";
+			return "<h1>" + client.printWorkingDirectory() + "</h1>";
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return "<h1> Problem during access of Working Directory </h1>";
 	}
+
 	@GET
 	@Produces("text/html")
 	@Path("/cwd/{directory}")
 	public String cwd(@PathParam("directory") String directory) {
-		if(!client.isConnected()) {
+		if (!client.isConnected()) {
 			return accessForbidden;
 		}
 		try {
@@ -137,7 +133,8 @@ public class FTPResource {
 			return "<h1> Erreur lors du changement de directory </h1>";
 		}
 		try {
-			return "<h1> Current directory is : " + client.printWorkingDirectory() + "</h1>";
+			return "<h1> Current directory is : "
+					+ client.printWorkingDirectory() + "</h1>";
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
