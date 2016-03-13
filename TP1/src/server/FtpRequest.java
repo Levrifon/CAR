@@ -303,7 +303,7 @@ public class FtpRequest extends Thread {
 			output.println(ReturnCode.nonAuth()  + '\r');
 			return;
 		}
-		output.write(userDir.getAbsolutePath()  + '\r');
+		output.write(ReturnCode.pathCreated() + " " + userDir.getAbsolutePath()  + '\r');
 		output.write('\n');
 		output.flush();
 	}
