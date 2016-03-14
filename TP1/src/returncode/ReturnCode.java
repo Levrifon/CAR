@@ -50,7 +50,7 @@ public class ReturnCode {
 		return FINISH_TRANS + " Transfer finish for file list";
 	}
 	public static String systType() {
-		return SYST_TYPE + " UNIX Type: L8";
+		return SYST_TYPE + " UNIX";
 	}
 	public static String fileStatusOk() {
 		return  FILE_STATUS_OK + " About to open data connection";
