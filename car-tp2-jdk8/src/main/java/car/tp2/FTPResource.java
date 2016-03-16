@@ -1,13 +1,13 @@
 package car.tp2;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.SocketException;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -24,10 +24,10 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 @Path("/ftp")
 public class FTPResource {
-	FTPClient client;
-	final String url = "localhost:8080/rest/tp2/ftp";
-	final String accessForbidden = "<h1> You are not connected, no access is possible </h1>";
-	FTPClientConfig conf;
+	public FTPClient client;
+	private final String url = "localhost:8080/rest/tp2/ftp";
+	private final String accessForbidden = "<h1> You are not connected, no access is possible </h1>";
+	private FTPClientConfig conf;
 	@GET
 	@Produces("text/html")
 	public String sayHello() {
@@ -40,12 +40,14 @@ public class FTPResource {
 	public StreamingOutput get(@PathParam("path") String path) {
 		StreamingOutput outputstream = null;
 		try {
+			/* on stock le fichier dans un flux */
 			final InputStream inputstream = client.retrieveFileStream(path);
 			outputstream = new StreamingOutput() {
 				@Override
 				public void write(OutputStream os) throws IOException,
 						WebApplicationException {
 					int lect;
+					/* on écrit le contenu dans l'OutputStream pour le return */
 					while ((lect = inputstream.read()) != -1) {
 						os.write(lect);
 					}
@@ -58,9 +60,9 @@ public class FTPResource {
 
 	}
 	
-	@DELETE
-	@Produces("application/octet-stream")
-	@Path("/deleted/{path: .*}")
+	@GET
+	@Produces("text/html; charset=UTF-8")
+	@Path("/deleted/{path}")
 	public String delete(@PathParam("path") String path) {
 		if (client == null || !client.isConnected()) {
 			return accessForbidden;
@@ -141,6 +143,7 @@ public class FTPResource {
 	@Path("/pwd/")
 	public String pwd() {
 		try {
+			/* affiche le repertoire courant */
 			return "<h1>" + client.printWorkingDirectory() + "</h1>";
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -172,17 +175,20 @@ public class FTPResource {
 	@POST
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces("text/html; charset=UTF-8")
-	@Path("/post/{name}")
-	public String postFile(@Multipart("name") String file) {
-		InputStream input;
+	@Path("/post/")
+	public String postFile(@Multipart("name") String file, @Multipart("path") String path) {
+		InputStream fichier = null;
+		try {
+			fichier = new FileInputStream(path + "/" + file);
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		}
 		if (!client.isConnected()) {
 			return accessForbidden;
 		}
 		boolean termine = false;
 		try {
-			input = new FileInputStream(file);
-			termine = client.storeFile(file, input);
-			input.close();
+			termine = client.storeFile(path + "/" + file, fichier);
 		} catch (IOException e) {
 			return "<h1>" + client.getReplyString() + "</h1>";
 		}
