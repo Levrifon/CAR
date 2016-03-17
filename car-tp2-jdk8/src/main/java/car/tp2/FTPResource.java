@@ -1,7 +1,5 @@
 package car.tp2;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -42,6 +40,8 @@ public class FTPResource {
 		try {
 			/* on stock le fichier dans un flux */
 			final InputStream inputstream = client.retrieveFileStream(path);
+			/* on envoie la confirmation de fin de transfert */
+			client.completePendingCommand();
 			outputstream = new StreamingOutput() {
 				@Override
 				public void write(OutputStream os) throws IOException,
@@ -172,23 +172,34 @@ public class FTPResource {
 		return "<h1> Erreur lors du changement de directory </h1>";
 	}
 
+	@GET
+	@Produces("text/html")
+	@Path("/startUpload")
+	public String getFormulaire() {
+		return "<div>"
+				+ "<h1 style='font-size:1.2em;"
+				+ " font-family: sans'>Telecharger un fichier"
+				+ "</h1>"
+				+ "<form method='POST' action='http://localhost:8080/rest/tp2/ftp/post'"
+				+ " enctype='multipart/form-data'>\n" + "Choisir le fichier"
+				+ "<input type='file' name='file'>"
+				+ "<br> nom de la destination : "
+				+ "<input type='text' name='name' /><br />\n"
+				+ "<input type='submit' value='Telecharger'>\n"
+				+ "</form> </div>";
+
+	}
 	@POST
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces("text/html; charset=UTF-8")
 	@Path("/post/")
-	public String postFile(@Multipart("name") String file, @Multipart("path") String path) {
-		InputStream fichier = null;
-		try {
-			fichier = new FileInputStream(path + "/" + file);
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-		}
+	public String postFile(@Multipart("file") InputStream file, @Multipart("name") String name) {
 		if (!client.isConnected()) {
 			return accessForbidden;
 		}
 		boolean termine = false;
 		try {
-			termine = client.storeFile(path + "/" + file, fichier);
+			termine = client.storeFile(name, file);
 		} catch (IOException e) {
 			return "<h1>" + client.getReplyString() + "</h1>";
 		}
