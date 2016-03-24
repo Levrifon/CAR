@@ -1,0 +1,42 @@
+package main;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import akka.actor.ActorRef;
+import akka.actor.ActorSystem;
+import akka.actor.Props;
+import arbres.ConstructMessage;
+import arbres.Noeud;
+
+public class Main {
+	public static void main(String[] args) {
+		ActorSystem system = ActorSystem.create("MySystem");
+		ActorRef ref1, ref2, ref3, ref4, ref5, ref6;
+		ref1 = system.actorOf(Props.create(Noeud.class), "Noeud1");
+		ref2 = system.actorOf(Props.create(Noeud.class), "Noeud2");
+		ref3 = system.actorOf(Props.create(Noeud.class), "Noeud3");
+		ref4 = system.actorOf(Props.create(Noeud.class), "Noeud4");
+		ref5 = system.actorOf(Props.create(Noeud.class), "Noeud5");
+		ref6 = system.actorOf(Props.create(Noeud.class), "Noeud6");
+		List<ActorRef> filsNoeud1 = new ArrayList<ActorRef>();
+		filsNoeud1.add(ref2);
+		filsNoeud1.add(ref5);
+		List<ActorRef> filsNoeud2 = new ArrayList<ActorRef>();
+		List<ActorRef> filsNoeud3 = new ArrayList<ActorRef>();
+		List<ActorRef> filsNoeud4= new ArrayList<ActorRef>();
+		filsNoeud2.add(ref3);
+		filsNoeud2.add(ref4);
+		List<ActorRef> filsNoeud5 = new ArrayList<ActorRef>();
+		List<ActorRef> filsNoeud6 = new ArrayList<ActorRef>();
+		filsNoeud5.add(ref6);
+		ref1.tell(new ConstructMessage(filsNoeud1), ref1);
+		ref2.tell(new ConstructMessage(filsNoeud2,ref1), ref2);
+		ref3.tell(new ConstructMessage(filsNoeud3, ref2), ref3);
+		ref4.tell(new ConstructMessage(filsNoeud4, ref2), ref4);
+		ref5.tell(new ConstructMessage(filsNoeud5,ref1), ref6);
+		ref6.tell(new ConstructMessage(filsNoeud6, ref5), ref6);
+		
+	}
+
+}
