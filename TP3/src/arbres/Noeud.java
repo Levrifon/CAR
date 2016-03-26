@@ -10,7 +10,7 @@ public class Noeud extends UntypedActor{
 	private List<ActorRef> fils;
 	private ActorRef father;
 	private boolean isLeaf;
-	private String messagerecu;
+	public static int messagerecu = 0;
 	public Noeud() {
 		this.fils = new ArrayList<ActorRef>();
 		isLeaf = false;
@@ -25,7 +25,7 @@ public class Noeud extends UntypedActor{
 				a.tell(message, getSelf());
 			}
 			if(!getSender().equals(self())) {
-				messagerecu = message.toString();
+				messagerecu++;
 			}
 			/* sinon si c'est un message de construction d'arbre ou de création de père etc */
 		} else if(message instanceof ConstructMessage) {
@@ -54,8 +54,5 @@ public class Noeud extends UntypedActor{
 	
 	private String getItsName(ActorRef a) {
 		return a.path().name();
-	}
-	public String getReceivedMessage() {
-		return this.messagerecu;
 	}
 }

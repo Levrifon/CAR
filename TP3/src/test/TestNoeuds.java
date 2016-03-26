@@ -1,6 +1,6 @@
 package test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +30,14 @@ public class TestNoeuds {
 		List<ActorRef> fils = new ArrayList<ActorRef>();
 		/* A --> B */
 		fils.add(ref2);
+		assertTrue(Noeud.messagerecu == 0);
 		ref1.tell(new ConstructMessage(fils), ActorRef.noSender());
 		ref1.tell(new Message("Coucou"), ActorRef.noSender());
+		system.stop(ref1);
+		system.stop(ref2);
+		system.shutdown();
+		System.out.println(Noeud.messagerecu);
+		assertTrue(Noeud.messagerecu == 2);
 	}
 
 }
