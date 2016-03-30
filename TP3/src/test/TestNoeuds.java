@@ -45,4 +45,11 @@ public class TestNoeuds {
 		system.shutdown();
 		assertTrue(counter.getCounter() == 2);
 	}
+	
+	/* les autres tests seraient dans le même esprit avec :
+	 * 	tester si tout les Noeuds "hasReceivedMessage"
+	 *  tester si ils ont bien reçus le message "Coucou"
+	 *  tester si la racine correspond bien au même noeud à chaque fois
+	 *  etc..
+	 */
 }
