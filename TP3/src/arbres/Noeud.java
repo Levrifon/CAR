@@ -2,18 +2,23 @@ package arbres;
 import java.util.ArrayList;
 import java.util.List;
 
+import message.ConstructMessage;
+import message.CounterMessage;
+import message.Message;
+
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 
-
+/**
+ * 
+ * @author Remy.D
+ *
+ */
 public class Noeud extends UntypedActor{
 	private List<ActorRef> fils;
 	private ActorRef father;
-	private boolean isLeaf;
-	public static int messagerecu = 0;
 	public Noeud() {
 		this.fils = new ArrayList<ActorRef>();
-		isLeaf = false;
 	}
 	@Override
 	public void onReceive(Object message) throws InterruptedException {
@@ -23,9 +28,6 @@ public class Noeud extends UntypedActor{
 			for(ActorRef a : fils) {
 				System.out.println(" Sending message to " + getItsName(a));
 				a.tell(message, getSelf());
-			}
-			if(!getSender().equals(self())) {
-				messagerecu++;
 			}
 			/* sinon si c'est un message de construction d'arbre ou de création de père etc */
 		} else if(message instanceof ConstructMessage) {
@@ -39,10 +41,15 @@ public class Noeud extends UntypedActor{
 			} else {
 				System.out.println("Je suis : " + this.getMyName() + " mes fils sont : " + fils);
 			}
+			/* sinon si c'est un message qui compte le nombre de transferts */
+		}else if(message instanceof CounterMessage) {
+			for(ActorRef a : fils) {
+				((CounterMessage) message).incrementMessage(); /* on incrémente le nombre de messages envoyés courant */
+				a.tell(message,getSelf());
+			}
 		} else {
 			unhandled(message);
 		}
-		
 	}
 	public void addChild(ActorRef n) {
 		fils.add(n);

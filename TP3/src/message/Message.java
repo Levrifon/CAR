@@ -1,10 +1,9 @@
-package arbres;
+package message;
 import java.io.Serializable;
 
 
 public class Message extends AbstractMessage implements Serializable {
 	private static final long serialVersionUID = 1L;
-	public String message;
 	
 	public Message(String message) {
 		this.message = message;

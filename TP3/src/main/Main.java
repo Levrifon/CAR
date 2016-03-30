@@ -3,15 +3,17 @@ package main;
 import java.util.ArrayList;
 import java.util.List;
 
+import message.ConstructMessage;
+
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
-import arbres.ConstructMessage;
 import arbres.Noeud;
 
 public class Main {
 	public static void main(String[] args) {
 		ActorSystem system = ActorSystem.create("MySystem");
+		/*ActorSystem system2 = ActorSystem.create("SecondarySystem"); permet de répondre à la question 4 du TP, en séparant les systèmes en deux parties*/ 
 		ActorRef ref1, ref2, ref3, ref4, ref5, ref6;
 		ref1 = system.actorOf(Props.create(Noeud.class), "Noeud1");
 		ref2 = system.actorOf(Props.create(Noeud.class), "Noeud2");
@@ -45,6 +47,7 @@ public class Main {
 		ref6.tell(new ConstructMessage(filsNoeud6, ref5), ref6);
 		filsNoeud4.add(ref6);
 		/*ref4.tell(new ConstructMessage(filsNoeud4,ref2),ref4);*/
+		system.shutdown();
 		
 		
 	}
