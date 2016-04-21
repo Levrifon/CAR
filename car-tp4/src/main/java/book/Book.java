@@ -14,11 +14,11 @@ public class Book implements Serializable{
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private long id;
-	private String author;
+	private Author author;
 	private String title;
 	
-	public Book(String author, String title) {
-		this.author = author;
+	public Book(Author aut, String title) {
+		this.author = aut;
 		this.title = title;
 	}
 	public Book(){}
@@ -27,10 +27,10 @@ public class Book implements Serializable{
 	public long getId() {
 		return this.id;
 	}
-	public String getAuthor() {
+	public Author getAuthor() {
 		return this.author;
 	}
-	public void setAuthor(String auth) {
+	public void setAuthor(Author auth) {
 		this.author = auth;
 	}
 	

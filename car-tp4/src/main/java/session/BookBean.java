@@ -25,4 +25,10 @@ public class BookBean implements BookItf {
 		return false;
 	}
 
+	@Override
+	public boolean findAllBook(String author) {
+		em.find(Book.class,author);
+		return false;
+	}
+
 }
