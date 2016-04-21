@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import main.java.book.Author;
+
 public class Client extends HttpServlet{
 	private static final long serialVersionUID = 1L;
 	
@@ -22,7 +24,7 @@ public class Client extends HttpServlet{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		boolean res = book.addBook("Test", "Test");
+		boolean res = book.addBook(new Author("Test"), "Test");
 		if(res){
 			out.println("<html><body>Ajout reussi</body></html>");
 		} else {
