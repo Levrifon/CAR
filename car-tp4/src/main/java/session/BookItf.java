@@ -1,6 +1,7 @@
-package session;
+package main.java.session;
 
 import javax.ejb.Local;
+
 
 @Local
 public interface BookItf {

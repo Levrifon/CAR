@@ -1,4 +1,4 @@
-package book;
+package main.java.book;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 

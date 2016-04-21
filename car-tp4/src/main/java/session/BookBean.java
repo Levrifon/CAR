@@ -1,4 +1,4 @@
-package session;
+package main.java.session;
 
 import java.awt.print.Book;
 
@@ -11,7 +11,7 @@ public class BookBean implements BookItf {
 	private EntityManager em;
 	@Override
 	public boolean addBook(String author, String title) {
-		book.Book b = new book.Book(author, title);
+		main.java.book.Book b = new main.java.book.Book(author, title);
 		em.persist(b);
 		return true;
 	}
