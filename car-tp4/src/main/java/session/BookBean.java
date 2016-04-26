@@ -1,19 +1,20 @@
-package main.java.session;
+package session;
 
-import java.awt.print.Book;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
-import main.java.book.Author;
+import book.Author;
+import book.Book;
 @Stateless(name="myBook")
 public class BookBean implements BookItf {
 	@PersistenceContext
 	private EntityManager em;
+	
 	@Override
 	public boolean addBook(Author author, String title) {
-		main.java.book.Book b = new main.java.book.Book(author, title);
+		Book b = new Book(author, title);
 		em.persist(b);
 		return true;
 	}
@@ -32,5 +33,4 @@ public class BookBean implements BookItf {
 		em.find(Book.class,author);
 		return false;
 	}
-
 }

@@ -1,8 +1,9 @@
-package main.java.session;
+package session;
 
 import javax.ejb.Local;
 
-import main.java.book.Author;
+import book.Author;
+
 
 
 @Local
