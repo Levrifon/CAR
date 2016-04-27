@@ -16,10 +16,12 @@ public class Book implements Serializable{
 	private long id;
 	private Author author;
 	private String title;
+	private String year;
 	
-	public Book(Author aut, String title) {
+	public Book(Author aut, String title,String year) {
 		this.author = aut;
 		this.title = title;
+		this.year = year;
 	}
 	public Book(){}
 	

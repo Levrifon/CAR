@@ -13,8 +13,8 @@ public class BookBean implements BookItf {
 	private EntityManager em;
 	
 	@Override
-	public boolean addBook(Author author, String title) {
-		Book b = new Book(author, title);
+	public boolean addBook(Author author, String title,String year) {
+		Book b = new Book(author, title, year);
 		em.persist(b);
 		return true;
 	}

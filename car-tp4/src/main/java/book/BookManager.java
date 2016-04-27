@@ -11,9 +11,9 @@ public class BookManager{
 	private EntityManager em;
 	
 	public void init() {
-		Book b1 = new Book(new Author("J.K Rowling"),"Harry Potter");
-		Book b2 = new Book(new Author("Victor Hugo"),"Les Miserables");
-		Book b3 = new Book(new Author("Enterprise Java Beans"),"Lionel Seinturier");
+		Book b1 = new Book(new Author("J.K Rowling"),"Harry Potter", "1998");
+		Book b2 = new Book(new Author("Victor Hugo"),"Les Miserables","1800");
+		Book b3 = new Book(new Author("Enterprise Java Beans"),"Lionel Seinturier","2145");
 		
 		/* ajoute les trois livres dans la table */
 		em.persist(b1);

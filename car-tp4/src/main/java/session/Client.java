@@ -25,7 +25,7 @@ public class Client extends HttpServlet{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		boolean res = book.addBook(new Author("Test"), "Test");
+		boolean res = book.addBook(new Author("Test"), "Test", "1950");
 		if(res){
 			out.println("<html><body>Ajout reussi</body></html>");
 		} else {

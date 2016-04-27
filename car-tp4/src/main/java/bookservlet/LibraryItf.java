@@ -13,5 +13,6 @@ public interface LibraryItf {
 	public List<Author> getAllAuthors();
 	public void addBook(Book book);
 	public void init();
+	public Book getBook(int idBook);
 
 }
