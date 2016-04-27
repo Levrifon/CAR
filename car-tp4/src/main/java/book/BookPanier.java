@@ -14,5 +14,12 @@ public class BookPanier {
 	
 	public void addToCart(int idBook, int quantity) {
 		Book book = library.getBook(idBook);
+		if(book != null) {
+			if(mycart.containsKey(book)) {
+				mycart.put(book,mycart.get(book) +quantity);
+			} else {
+				mycart.put(book,quantity);
+			}
+		}
 	}
 }
